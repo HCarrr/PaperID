@@ -48,3 +48,4 @@ Struktur utama sistem tampaknya terdiri dari beberapa modul/kelas kunci:
     * `KuitansiPembelian`: Bukti pembayaran untuk pembelian.
     * `KuitansiPenjualan`: Bukti pembayaran untuk penjualan.
 * `Pembayaran` (Interface): Mendefinisikan kontrak untuk proses pembayaran.
+* `LogAktivitasPembayaran`: Entitas untuk pencatatan semua aktivitas terkait proses pembayaran.
