@@ -1,7 +1,6 @@
 // User.java
 package com.example.inventory.auth;
 
-import org.mindrot.jbcrypt.BCrypt;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID; // Untuk menghasilkan userId unik
@@ -9,7 +8,7 @@ import java.util.UUID; // Untuk menghasilkan userId unik
 public class User {
     private String userId;
     private String username;
-    private String passwordHash; // Menyimpan password yang sudah di-hash
+    private String password; // Simpan password secara plain (hanya simulasi)
     private String email;
     private boolean isLoggedIn;
 
@@ -17,10 +16,10 @@ public class User {
     // Dalam aplikasi nyata, ini adalah koneksi database atau repository
     private static final Map<String, User> usersDb = new HashMap<>(); // username -> Objek User
 
-    public User(String userId, String username, String passwordHash, String email) {
+    public User(String userId, String username, String password, String email) {
         this.userId = userId;
         this.username = username;
-        this.passwordHash = passwordHash;
+        this.password = password;
         this.email = email;
         this.isLoggedIn = false; // Status default saat objek dibuat
         usersDb.put(username, this); // Tambahkan ke "DB" simulasi
@@ -28,6 +27,10 @@ public class User {
     }
 
     public static User register(String username, String plainPassword, String email) {
+        if (username == null || username.trim().isEmpty()) {
+            System.out.println("[User] Registrasi gagal: Username tidak boleh kosong.");
+            return null;
+        }
         if (usersDb.containsKey(username)) {
             System.out.println("[User] Registrasi gagal: Username '" + username + "' sudah ada.");
             return null;
@@ -36,11 +39,18 @@ public class User {
             System.out.println("[User] Registrasi gagal: Password tidak boleh kosong.");
             return null;
         }
-
+        if (email == null || email.trim().isEmpty()) {
+            System.out.println("[User] Registrasi gagal: Email tidak boleh kosong.");
+            return null;
+        }
+        if (!email.contains("@")) {
+            System.out.println("[User] Registrasi gagal: Email harus mengandung '@'.");
+            return null;
+        }
         String newUserId = UUID.randomUUID().toString();
-        String hashedPassword = hashPassword(plainPassword);
+        // Tidak hash password, simpan langsung
         System.out.println("[User] User '" + username + "' berhasil didaftarkan.");
-        return new User(newUserId, username, hashedPassword, email);
+        return new User(newUserId, username, plainPassword, email);
     }
 
     public static User authenticate(String username, String plainPassword) {
@@ -69,17 +79,15 @@ public class User {
             System.out.println("[User] Gagal mengubah password: Password baru tidak boleh kosong.");
             return false;
         }
-        this.passwordHash = hashPassword(newPlainPassword);
+        this.password = newPlainPassword;
         System.out.println("[User] Password untuk user '" + this.username + "' berhasil diubah.");
         return true;
     }
 
-    private static String hashPassword(String plainPassword) {
-        return BCrypt.hashpw(plainPassword, BCrypt.gensalt());
-    }
+    // Tidak perlu hashPassword lagi
 
     private boolean verifyPassword(String plainPassword) {
-        return BCrypt.checkpw(plainPassword, this.passwordHash);
+        return this.password.equals(plainPassword);
     }
 
     public String getUserId() {
