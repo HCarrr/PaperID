@@ -1,0 +1,15 @@
+com\example\inventory\transaction\OrderPembelian.class
+com\example\inventory\transaction\KuitansiPembelian.class
+com\example\inventory\payment\IPembayaran.class
+com\example\inventory\transaction\InvoicePembelian.class
+com\example\inventory\model\PaperNetwork.class
+com\example\inventory\transaction\InvoicePenjualan.class
+com\example\inventory\transaction\OrderPenjualan.class
+com\example\inventory\model\Mitra.class
+com\example\inventory\model\Stok.class
+com\example\inventory\model\Produk.class
+com\example\inventory\transaction\KuitansiPenjualan.class
+com\example\inventory\transaction\Kuitansi.class
+com\dpbo\paperid\MainApp.class
+com\example\inventory\auth\User.class
+com\example\inventory\transaction\DokumenTransaksi.class

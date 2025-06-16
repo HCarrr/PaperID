@@ -17,6 +17,7 @@ import com.example.inventory.transaction.KuitansiPembelian;
 import com.example.inventory.transaction.KuitansiPenjualan;
 import com.example.inventory.transaction.OrderPembelian;
 import com.example.inventory.transaction.OrderPenjualan;
+import com.example.inventory.transaction.ReportGenerator;
 
 public class MainApp {
     public static void main(String[] args) {
@@ -27,16 +28,9 @@ public class MainApp {
         ArrayList<Stok> daftarStok = new ArrayList<>();
         ArrayList<Mitra> daftarMitra = new ArrayList<>();
         ArrayList<User> daftarUser = new ArrayList<>();
-
-        // Produk & Stok awal
-        Produk laptop = new Produk("PRD001", "Laptop Gaming", 15000000.0, 12000000.0, "Laptop canggih untuk gaming.");
-        Stok stokLaptop = new Stok("STK001", 10, "Gudang Utama");
-        Produk keyboard = new Produk("PRD002", "Keyboard Mekanik", 1200000.0, 900000.0, "Keyboard gaming RGB.");
-        Stok stokKeyboard = new Stok("STK002", 20, "Gudang Cabang A");
-        daftarProduk.add(laptop);
-        daftarProduk.add(keyboard);
-        daftarStok.add(stokLaptop);
-        daftarStok.add(stokKeyboard);
+        ArrayList<com.example.inventory.transaction.OrderPenjualan> daftarOrderPenjualan = new ArrayList<>();
+        ArrayList<com.example.inventory.transaction.InvoicePembelian> daftarInvoicePembelian = new ArrayList<>();
+        ArrayList<com.example.inventory.transaction.DokumenTransaksi> daftarDokumenTransaksi = new ArrayList<>();
 
         // Mitra awal
         Mitra supplierA = new Mitra("MIT001", "PT. Teknologi Jaya", "Jl. Merdeka No. 10", "0812-3456-7890");
@@ -153,6 +147,8 @@ public class MainApp {
         orderJual1.tambahProduk(produkKeyboard, 2);
         orderJual1.cetakDokumen();
         System.out.println("Detail Order Penjualan: " + orderJual1.getDetailTransaksi());
+        daftarOrderPenjualan.add(orderJual1);
+        daftarDokumenTransaksi.add(orderJual1);
 
         // Update stok setelah order penjualan
         produkStokLaptop.kurangStok(1);
@@ -196,6 +192,12 @@ public class MainApp {
         ArrayList<Stok> stokMenu = new ArrayList<>();
         ArrayList<Mitra> mitraMenu = new ArrayList<>();
         ArrayList<User> userMenu = new ArrayList<>();
+        ArrayList<com.example.inventory.transaction.OrderPenjualan> orderPenjualanMenu = new ArrayList<>();
+        ArrayList<com.example.inventory.transaction.InvoicePembelian> invoicePembelianMenu = new ArrayList<>();
+        ArrayList<com.example.inventory.transaction.DokumenTransaksi> dokumenTransaksiMenu = new ArrayList<>();
+        ReportGenerator reportGenMenu = new ReportGenerator("RPTCLI", "CLI");
+
+        // Tambahkan deklarasi variabel userLoginMenu di sini
         User userLoginMenu = null;
 
         boolean running = true;
@@ -206,7 +208,10 @@ public class MainApp {
             System.out.println("3. Input Produk & Stok Baru");
             System.out.println("4. Input Mitra Baru");
             System.out.println("5. Buat Order Pembelian");
-            System.out.println("6. Buat Invoice Pembelian & Proses Pembayaran");
+            // Tambahkan menu order penjualan
+            System.out.println("6. Buat Order Penjualan");
+            System.out.println("7. Buat Invoice Pembelian & Proses Pembayaran");
+            System.out.println("8. Lihat Laporan (Report Generator)");
             System.out.println("0. Keluar");
             System.out.print("Pilih menu: ");
             String pilihan = scanner.nextLine();
@@ -411,6 +416,84 @@ public class MainApp {
                         // Tidak perlu variabel lastOrderPembelian jika tidak digunakan di menu lain
                         break;
                     case "6":
+                        // Buat Order Penjualan
+                        if (produkMenu.isEmpty() || mitraMenu.isEmpty()) {
+                            System.out.println("Produk dan Mitra harus sudah diinput terlebih dahulu.");
+                            break;
+                        }
+                        System.out.println("\n--- Buat Order Penjualan ---");
+                        System.out.print("Kode Order Penjualan: ");
+                        String kodeOrderJual = scanner.nextLine();
+
+                        // Pilih mitra (pelanggan)
+                        System.out.println("Daftar Mitra (Pelanggan):");
+                        for (int i = 0; i < mitraMenu.size(); i++) {
+                            Mitra m = mitraMenu.get(i);
+                            System.out.println((i+1) + ". [ID: " + m.getIdMitra() + "] " + m.getNama());
+                        }
+                        Mitra pelangganDipilih = null;
+                        while (pelangganDipilih == null) {
+                            System.out.print("Pilih nomor mitra atau masukkan ID mitra: ");
+                            String inputMitra = scanner.nextLine();
+                            try {
+                                int idxMitra = Integer.parseInt(inputMitra) - 1;
+                                if (idxMitra >= 0 && idxMitra < mitraMenu.size()) {
+                                    pelangganDipilih = mitraMenu.get(idxMitra);
+                                    break;
+                                }
+                            } catch (NumberFormatException nfe) {
+                                for (Mitra m : mitraMenu) {
+                                    if (m.getIdMitra().equals(inputMitra)) {
+                                        pelangganDipilih = m;
+                                        break;
+                                    }
+                                }
+                                if (pelangganDipilih != null) break;
+                            }
+                            System.out.println("Pilihan tidak tersedia.");
+                        }
+
+                        OrderPenjualan orderPenjualan = new OrderPenjualan(kodeOrderJual, new Date(), pelangganDipilih);
+
+                        // Pilih produk
+                        System.out.println("Daftar Produk:");
+                        for (int i = 0; i < produkMenu.size(); i++) {
+                            System.out.println((i+1) + ". " + produkMenu.get(i).getDetailProduk());
+                        }
+                        int idxProdukJual = -1;
+                        while (true) {
+                            System.out.print("Pilih nomor produk: ");
+                            try {
+                                idxProdukJual = Integer.parseInt(scanner.nextLine()) - 1;
+                                if (idxProdukJual >= 0 && idxProdukJual < produkMenu.size()) break;
+                                else System.out.println("Pilihan tidak tersedia.");
+                            } catch (NumberFormatException nfe) {
+                                System.out.println("Input angka tidak valid.");
+                            }
+                        }
+                        Produk produkJualDipilih = produkMenu.get(idxProdukJual);
+
+                        int jumlahJual = 0;
+                        while (true) {
+                            System.out.print("Jumlah produk yang ingin dijual: ");
+                            try {
+                                jumlahJual = Integer.parseInt(scanner.nextLine());
+                                if (jumlahJual > 0) break;
+                                else System.out.println("Jumlah harus lebih dari 0.");
+                            } catch (NumberFormatException nfe) {
+                                System.out.println("Input angka tidak valid.");
+                            }
+                        }
+                        orderPenjualan.tambahProduk(produkJualDipilih, jumlahJual);
+
+                        orderPenjualan.cetakDokumen();
+                        System.out.println("Total Order Penjualan: " + orderPenjualan.getTotalOrder());
+
+                        // Simpan ke list order penjualan dan dokumen transaksi
+                        orderPenjualanMenu.add(orderPenjualan);
+                        dokumenTransaksiMenu.add(orderPenjualan);
+                        break;
+                    case "7":
                         // Buat Invoice Pembelian & Proses Pembayaran
                         // Cek apakah sudah ada order pembelian
                         // Untuk demo, ambil order terakhir dari menu 5
@@ -509,6 +592,15 @@ public class MainApp {
                             kuitansiPembelian.cetakDokumen();
                             System.out.println("Detail Kuitansi: " + kuitansiPembelian.getDetailTransaksi());
                         }
+                        break;
+                    case "8":
+                        System.out.println("\n--- Laporan Sistem (CLI) ---");
+                        System.out.println(reportGenMenu.generateInventorySummary(produkMenu, stokMenu));
+                        Date nowMenu = new Date();
+                        Calendar calStartMenu = Calendar.getInstance();
+                        calStartMenu.setTime(nowMenu);
+                        calStartMenu.add(Calendar.DAY_OF_MONTH, -30);
+                        System.out.println(reportGenMenu.generateTransactionSummary(dokumenTransaksiMenu, calStartMenu.getTime(), nowMenu));
                         break;
                     case "0":
                         running = false;

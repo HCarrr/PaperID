@@ -54,6 +54,14 @@ public class User {
     }
 
     public static User authenticate(String username, String plainPassword) {
+        if (username == null || username.trim().isEmpty()) {
+            System.out.println("[User] Otentikasi gagal: Username tidak boleh kosong.");
+            return null;
+        }
+        if (plainPassword == null || plainPassword.isEmpty()) {
+            System.out.println("[User] Otentikasi gagal: Password tidak boleh kosong.");
+            return null;
+        }
         User user = usersDb.get(username);
         if (user == null) {
             System.out.println("[User] Otentikasi gagal: User '" + username + "' tidak ditemukan.");

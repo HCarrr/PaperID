@@ -25,11 +25,19 @@ public class Stok {
     }
 
     public void tambahStok(int jumlah) {
+        if (jumlah < 0) {
+            System.out.println("[Stok] Tidak bisa menambah stok dengan nilai negatif.");
+            return;
+        }
         this.jumlah += jumlah;
         System.out.println("[Stok] Stok " + idStok + " bertambah menjadi: " + this.jumlah + " di " + this.lokasi);
     }
 
     public void kurangStok(int jumlah) {
+        if (jumlah < 0) {
+            System.out.println("[Stok] Tidak bisa mengurangi stok dengan nilai negatif.");
+            return;
+        }
         if (this.jumlah >= jumlah) {
             this.jumlah -= jumlah;
             System.out.println("[Stok] Stok " + idStok + " berkurang menjadi: " + this.jumlah + " di " + this.lokasi);
